@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="en" class="h-full" dir="ltr">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harbouq</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;family=Playfair+Display:wght@600;700&amp;display=swap" rel="stylesheet">
+  <style>
+:root {
+  --aubergine: #1a0f2e;
+  --steel-navy: #0f1729;
+  --royal-amethyst: #6366f1;
+  --emerald: #10b981;
+  --amber: #f59e0b;
+  --rose: #ef4444;
+  --porcelain: #f8f7ff;
+  --lilac-border: #e9d5ff;
+  --slate-purple: #1f172d;
+  --purple-shadow: rgba(26, 15, 46, 0.08);
+  --gold: #d4af37;
+}
+html, body { height: 100%; margin: 0; }
+body { font-family: 'IBM Plex Sans Arabic', sans-serif; background: var(--porcelain); color: var(--slate-purple); }
+.sidebar { background: var(--aubergine); }
+.gradient-btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
+.gradient-btn:hover { background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%); }
+.premium-card { 
+  border: 1px solid var(--lilac-border); 
+  box-shadow: 0 10px 40px rgba(99, 102, 241, 0.08); 
+  background: linear-gradient(135deg, #ffffff 0%, #faf9ff 100%);
+}
+.kpi-card { border: 1px solid var(--lilac-border); box-shadow: 0 10px 40px rgba(99, 102, 241, 0.06); background: #ffffff; }
+.stat-up { color: var(--emerald); }
+.stat-down { color: var(--rose); }
+.chart-container { position: relative; height: 300px; }
+.chat-bubble-ai { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; }
+.chat-bubble-user { background: #e9d5ff; color: var(--slate-purple); }
+.nav-item { transition: all 0.3s; border-right: 3px solid transparent; }
+.nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); border-right-color: #818cf8; }
+canvas { display: block; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: fadeUp 0.5s ease both; }
+.fade-up-d1 { animation-delay: 0.08s; }
+.fade-up-d2 { animation-delay: 0.16s; }
+.fade-up-d3 { animation-delay: 0.24s; }
+.fade-up-d4 { animation-delay: 0.32s; }
+.fade-up-d5 { animation-delay: 0.4s; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d8bfd8; border-radius: 3px; }
+.text-gradient { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.premium-glow { box-shadow: 0 0 30px rgba(99, 102, 241, 0.15); }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full overflow-hidden">
+  <div id="app-root" class="flex h-full w-full"><!-- Sidebar -->
+   <aside class="sidebar flex-shrink-0 w-64 flex flex-col text-white overflow-y-auto" style="min-height:100%">
+    <div class="p-6 flex items-center gap-3 border-b border-white border-opacity-10">
+     <div class="w-12 h-12 rounded-xl gradient-btn flex items-center justify-center premium-glow"><i data-lucide="gem" style="width:20px;height:20px;color:white"></i>
+     </div>
+     <div><span id="sidebar-brand" class="text-lg font-bold tracking-tight block" style="font-family:'Playfair Display',serif">Harbouq</span> <span id="tagline" class="text-xs opacity-70">Smart Financial Management</span>
+     </div>
+    </div>
+    <nav class="flex-1 px-4 mt-6 space-y-2" role="navigation" aria-label="Main Navigation"><button class="nav-item active w-full flex items-center gap-3 px-4 py-3 rounded text-sm font-medium hover:bg-white hover:bg-opacity-10 transition" onclick="switchTab('dashboard')"> <i data-lucide="layout-dashboard" style="width:18px;height:18px"></i> <span id="nav-dashboard">Dashboard</span> </button> <button class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded text-sm font-medium hover:bg-white hover:bg-opacity-10 transition" onclick="switchTab('planning')"> <i data-lucide="sliders" style="width:18px;height:18px"></i> <span id="nav-planning">Strategic Planning</span> </button> <button class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded text-sm font-medium hover:bg-white hover:bg-opacity-10 transition" onclick="switchTab('ai')"> <i data-lucide="sparkles" style="width:18px;height:18px"></i> <span id="nav-ai-name">Ask Harbouq</span> </button> 
+      <button class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded text-sm font-medium hover:bg-white hover:bg-opacity-10 transition" onclick="switchTab('inventory')"> 
+  <i data-lucide="box" style="width:18px;height:18px"></i> 
+  <span id="nav-inventory">Inventory & Suppliers</span> 
+</button> <button class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded text-sm font-medium opacity-50 cursor-default"> <i data-lucide="file-text" style="width:18px;height:18px"></i> <span id="nav-reports">Reports</span> </button> <button class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded text-sm font-medium opacity-50 cursor-default"> <i data-lucide="settings" style="width:18px;height:18px"></i> <span id="nav-settings">Settings</span> </button>
+    </nav>
+    <div class="p-5 mx-4 mb-6 rounded-xl" style="background:linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.04))">
+     <p id="plan-label" class="text-xs opacity-60 mb-1">Plan</p>
+     <p id="plan-tier" class="text-sm font-semibold">Enterprise</p>
+     <div class="mt-3 h-2 rounded-full" style="background:rgba(255,255,255,0.12)">
+      <div class="h-full rounded-full" style="width:72%;background:linear-gradient(90deg,#818cf8,#6366f1)"></div>
+     </div>
+     <p id="plan-usage" class="text-xs opacity-50 mt-2">72% of allowance used</p>
+    </div>
+   </aside><!-- Main Content -->
+   <main class="flex-1 flex flex-col overflow-hidden" style="min-width:0"><!-- Top Bar -->
+    <header class="flex-shrink-0 flex items-center justify-between px-8 py-5 border-b" style="border-color:var(--lilac-border)">
+     <div>
+      <h1 id="greeting-el" class="text-2xl font-bold text-gradient" style="font-family:'Playfair Display',serif">Welcome back, Manager</h1>
+      <p id="subtitle-el" class="text-sm mt-1" style="color:#8b5cf6">Here's an overview of your financial performance today</p>
+     </div>
+     <div class="flex items-center gap-4"><button id="lang-toggle" class="px-3 py-2 rounded-lg text-sm font-semibold transition" style="background:#e9d5ff;color:#6366f1" onclick="toggleLanguage()">العربية</button> <button class="relative p-3 rounded-lg hover:bg-indigo-50 transition"> <i data-lucide="bell" style="width:20px;height:20px;color:#6366f1"></i> <span class="absolute top-2 right-2 w-2.5 h-2.5 rounded-full" style="background:var(--rose)"></span> </button>
+      <div class="w-11 h-11 rounded-lg flex items-center justify-center text-white text-sm font-bold gradient-btn">
+       HQ
+      </div>
+     </div>
+    </header><!-- Scrollable Content Area -->
+    <div class="flex-1 overflow-y-auto p-6 space-y-6"><!-- TAB: Dashboard -->
+     <div id="tab-dashboard"><!-- KPI Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+       <div class="kpi-card rounded-xl p-5 fade-up">
+        <div class="flex items-center justify-between mb-3"><span id="kpi-revenue" class="text-xs font-semibold" style="color:#8b5cf6">Revenue</span> <i data-lucide="trending-up" style="width:16px;height:16px;color:var(--emerald)"></i>
+        </div>
+        <p class="text-2xl font-bold" style="color:#0f1729"><span dir="ltr">$28.4K</span></p>
+        <p class="text-xs mt-2 stat-up"><span dir="ltr">+12.4%</span> <span id="stat-rev">from last month</span></p>
+       </div>
+       <div class="kpi-card rounded-xl p-5 fade-up fade-up-d1">
+        <div class="flex items-center justify-between mb-3"><span id="kpi-expenses" class="text-xs font-semibold" style="color:#8b5cf6">Expenses</span> <i data-lucide="trending-down" style="width:16px;height:16px;color:var(--rose)"></i>
+        </div>
+        <p class="text-2xl font-bold" style="color:#0f1729"><span dir="ltr">$18.7K</span></p>
+        <p class="text-xs mt-2 stat-down"><span dir="ltr">+3.1%</span> <span id="stat-exp">from last month</span></p>
+       </div>
+       <div class="kpi-card rounded-xl p-5 fade-up fade-up-d2">
+        <div class="flex items-center justify-between mb-3"><span id="kpi-profit" class="text-xs font-semibold" style="color:#8b5cf6">Profit</span> <i data-lucide="dollar-sign" style="width:16px;height:16px;color:var(--emerald)"></i>
+        </div>
+        <p class="text-2xl font-bold" style="color:#0f1729"><span dir="ltr">$9.7K</span></p>
+        <p class="text-xs mt-2 stat-up"><span dir="ltr">+28.7%</span> <span id="stat-prof">profit margin</span></p>
+       </div>
+       <div class="kpi-card rounded-xl p-5 fade-up fade-up-d3">
+        <div class="flex items-center justify-between mb-3"><span id="kpi-runway" class="text-xs font-semibold" style="color:#8b5cf6">Cash Runway</span> <i data-lucide="clock" style="width:16px;height:16px;color:#6366f1"></i>
+        </div>
+        <p class="text-2xl font-bold" style="color:#0f1729"><span dir="ltr">14.2</span> <span id="mo-text" class="text-sm">mo</span></p>
+        <p id="runway-val" class="text-xs mt-2" style="color:#10b981">Healthy position</p>
+       </div>
+       <div class="kpi-card rounded-xl p-5 fade-up fade-up-d4">
+        <div class="flex items-center justify-between mb-3"><span id="kpi-risk" class="text-xs font-semibold" style="color:#8b5cf6">Risk Score</span> <i data-lucide="shield" style="width:16px;height:16px;color:var(--emerald)"></i>
+        </div>
+        <p id="risk-val" class="text-2xl font-bold" style="color:#0f1729">Low</p>
+        <div class="flex gap-1 mt-2">
+         <div class="h-1.5 flex-1 rounded-full" style="background:var(--emerald)"></div>
+         <div class="h-1.5 flex-1 rounded-full" style="background:var(--emerald)"></div>
+         <div class="h-1.5 flex-1 rounded-full" style="background:#e9d5ff"></div>
+         <div class="h-1.5 flex-1 rounded-full" style="background:#e9d5ff"></div>
+        </div>
+       </div>
+      </div><!-- Charts -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
+       <div class="lg:col-span-2 kpi-card rounded-xl p-6 fade-up fade-up-d3">
+        <div class="flex items-center justify-between mb-4">
+         <h2 id="chart-title" class="font-semibold" style="color:var(--steel-navy)">Revenue &amp; Expenses</h2>
+         <div class="flex gap-4 text-xs"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:#6366f1"></span><span id="legend-revenue">Revenue</span></span> <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:#f59e0b"></span><span id="legend-expenses">Expenses</span></span>
+         </div>
+        </div>
+        <div style="position:relative;height:280px">
+         <canvas id="mainChart"></canvas>
+        </div>
+       </div>
+       <div class="kpi-card rounded-xl p-6 fade-up fade-up-d4">
+        <h2 id="donut-title" class="font-semibold mb-4" style="color:var(--steel-navy)">Expense Distribution</h2>
+        <div style="position:relative;height:220px">
+         <canvas id="donutChart"></canvas>
+        </div>
+        <div class="mt-4 space-y-2 text-xs">
+         <div class="flex justify-between">
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full" style="background:#6366f1"></span><span id="expense-salaries">Salaries</span></span><span class="font-semibold">42%</span>
+         </div>
+         <div class="flex justify-between">
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full" style="background:var(--emerald)"></span><span id="expense-operations">Operations</span></span><span class="font-semibold">28%</span>
+         </div>
+         <div class="flex justify-between">
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full" style="background:var(--amber)"></span><span id="expense-marketing">Marketing</span></span><span class="font-semibold">18%</span>
+         </div>
+         <div class="flex justify-between">
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full" style="background:#e9d5ff"></span><span id="expense-other">Other</span></span><span class="font-semibold">12%</span>
+         </div>
+        </div>
+       </div>
+      </div><!-- Recent Transactions -->
+      <div class="kpi-card rounded-xl p-6 mt-6 fade-up fade-up-d5">
+       <h2 id="txn-title" class="font-semibold mb-4" style="color:var(--steel-navy)">Recent Transactions</h2>
+       <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+         <thead>
+          <tr class="text-left rtl:text-right text-xs" style="color:#8b5cf6;border-bottom:1px solid #e9d5ff">
+           <th id="th-description" class="pb-3 font-semibold">Description</th>
+           <th id="th-category" class="pb-3 font-semibold">Category</th>
+           <th id="th-date" class="pb-3 font-semibold">Date</th>
+           <th id="th-amount" class="pb-3 font-semibold ltr:text-right rtl:text-left">Amount</th>
+          </tr>
+         </thead>
+         <tbody id="txn-body">
+          <tr class="border-t" style="border-color:#e9d5ff">
+           <td id="txn-desc-1" class="py-4 font-medium">Client Invoice #1042</td>
+           <td class="py-4"><span class="px-3 py-1 rounded-full text-xs font-semibold" style="background:#d1fae5;color:var(--emerald)"><span id="cat-income">Income</span></span></td>
+           <td id="txn-date-1" class="py-4" style="color:#8b5cf6">Dec 18</td>
+           <td class="py-4 ltr:text-right rtl:text-left font-bold stat-up"><span dir="ltr">+$2,450</span></td>
+          </tr>
+          <tr class="border-t" style="border-color:#e9d5ff">
+           <td id="txn-desc-2" class="py-4 font-medium">AWS Hosting</td>
+           <td class="py-4"><span class="px-3 py-1 rounded-full text-xs font-semibold" style="background:#fee2e2;color:var(--rose)"><span id="cat-expense">Expense</span></span></td>
+           <td id="txn-date-2" class="py-4" style="color:#8b5cf6">Dec 17</td>
+           <td class="py-4 ltr:text-right rtl:text-left font-bold stat-down"><span dir="ltr">-$320</span></td>
+          </tr>
+          <tr class="border-t" style="border-color:#e9d5ff">
+           <td id="txn-desc-3" class="py-4 font-medium">Monthly Payroll</td>
+           <td class="py-4"><span class="px-3 py-1 rounded-full text-xs font-semibold" style="background:#fee2e2;color:var(--rose)"><span id="cat-expense2">Expense</span></span></td>
+           <td id="txn-date-3" class="py-4" style="color:#8b5cf6">Dec 15</td>
+           <td class="py-4 ltr:text-right rtl:text-left font-bold stat-down"><span dir="ltr">-$7,840</span></td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- TAB: Strategic Planning -->
+     <div id="tab-planning" class="hidden">
+      <h2 id="planning-title" class="text-2xl font-bold text-gradient mb-2" style="font-family:'Playfair Display',serif">Strategic Planning</h2>
+      <p id="planning-desc" class="text-sm mb-6" style="color:#8b5cf6">Simulate business scenarios and see expected outcomes.</p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><!-- Sliders -->
+       <div class="kpi-card rounded-xl p-6 space-y-6">
+        <h3 id="scenario-title" class="font-semibold text-lg" style="color:var(--steel-navy)">Scenario Variables</h3>
+        <div>
+         <div class="flex justify-between text-sm mb-3"><label for="slider-hire" id="label-hire" class="font-semibold">New Hires</label> <span id="val-hire" class="font-bold" style="color:#6366f1">2</span>
+         </div><input id="slider-hire" type="range" min="0" max="10" value="2" class="w-full" style="accent-color:#6366f1" oninput="updateScenario()">
+         <div class="flex justify-between text-xs mt-2" style="color:#8b5cf6">
+          <span dir="ltr">0</span><span dir="ltr">10</span>
+         </div>
+        </div>
+        <div>
+         <div class="flex justify-between text-sm mb-3"><label for="slider-price" id="label-price" class="font-semibold">Price Increase</label> <span id="val-price" class="font-bold" style="color:#6366f1" dir="ltr">5%</span>
+         </div><input id="slider-price" type="range" min="0" max="25" value="5" class="w-full" style="accent-color:#6366f1" oninput="updateScenario()">
+         <div class="flex justify-between text-xs mt-2" style="color:#8b5cf6">
+          <span dir="ltr">0%</span><span dir="ltr">25%</span>
+         </div>
+        </div>
+        <div>
+         <div class="flex justify-between text-sm mb-3"><label for="slider-volume" id="label-volume" class="font-semibold">Sales Volume Growth</label> <span id="val-volume" class="font-bold" style="color:#6366f1" dir="ltr">10%</span>
+         </div><input id="slider-volume" type="range" min="0" max="50" value="10" class="w-full" style="accent-color:#6366f1" oninput="updateScenario()">
+         <div class="flex justify-between text-xs mt-2" style="color:#8b5cf6">
+          <span dir="ltr">0%</span><span dir="ltr">50%</span>
+         </div>
+        </div>
+       </div><!-- Projected Outcomes -->
+       <div class="kpi-card rounded-xl p-6">
+        <h3 id="outcomes-title" class="font-semibold text-lg mb-4" style="color:var(--steel-navy)">Projected Outcomes (12 months)</h3>
+        <div class="space-y-3">
+         <div class="p-4 rounded-lg" style="background:linear-gradient(135deg,#dbeafe,#f0e7ff)">
+          <p id="label-proj-rev" class="text-xs mb-1" style="color:#8b5cf6">Projected Revenue</p>
+          <p id="proj-rev" class="text-2xl font-bold" style="color:var(--emerald)" dir="ltr">$3.72M</p>
+         </div>
+         <div class="p-4 rounded-lg" style="background:linear-gradient(135deg,#fee2e2,#fef3c7)">
+          <p id="label-proj-exp" class="text-xs mb-1" style="color:#8b5cf6">Projected Expenses</p>
+          <p id="proj-exp" class="text-2xl font-bold" style="color:var(--rose)" dir="ltr">$2.38M</p>
+         </div>
+         <div class="p-4 rounded-lg" style="background:linear-gradient(135deg,#dcfce7,#dbeafe)">
+          <p id="label-proj-profit" class="text-xs mb-1" style="color:#8b5cf6">Net Profit</p>
+          <p id="proj-profit" class="text-2xl font-bold" style="color:var(--emerald)" dir="ltr">$1.34M</p>
+         </div>
+         <div class="p-4 rounded-lg" style="background:linear-gradient(135deg,#f3e8ff,#dbeafe)">
+          <p id="label-proj-runway" class="text-xs mb-1" style="color:#8b5cf6">Updated Cash Runway</p>
+          <p id="proj-runway" class="text-2xl font-bold" style="color:#6366f1">18.6 months</p>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- TAB: AI Chat -->
+     <div id="tab-ai" class="hidden h-full">
+      <div class="kpi-card rounded-xl flex flex-col" style="height:calc(100% - 8px)">
+       <div class="flex items-center gap-3 p-5 border-b" style="border-color:var(--lilac-border)">
+        <div class="w-10 h-10 rounded-lg gradient-btn flex items-center justify-center"><i data-lucide="sparkles" style="width:18px;height:18px;color:white"></i>
+        </div>
+        <div>
+         <h2 id="ai-chat-title" class="font-semibold text-sm" style="color:var(--steel-navy)">Ask Harbouq</h2>
+         <p id="ai-status" class="text-xs" style="color:var(--emerald)">● Online Now</p>
+        </div>
+       </div>
+       <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4">
+        <div class="flex gap-3">
+         <div class="w-10 h-10 rounded-lg gradient-btn flex items-center justify-center flex-shrink-0"><i data-lucide="sparkles" style="width:16px;height:16px;color:white"></i>
+         </div>
+         <div class="chat-bubble-ai px-4 py-3 rounded-2xl rounded-tl-sm max-w-xs text-sm leading-relaxed">
+          <span id="ai-greeting">Hi 👋 I'm Harbouq, your smart assistant. Ask about cash flow, budgeting or growth strategy!</span>
+         </div>
+        </div>
+       </div>
+       <form id="chat-form" class="flex-shrink-0 p-5 border-t flex gap-2" style="border-color:var(--lilac-border)"><label for="chat-input" class="sr-only">Message</label> <input id="chat-input" type="text" placeholder="Ask Harbouq a question..." class="flex-1 px-4 py-2.5 rounded-xl text-sm border outline-none focus:ring-2" style="border-color:var(--lilac-border)" autocomplete="off"> <button type="submit" class="gradient-btn text-white px-4 py-2.5 rounded-xl flex items-center justify-center rtl:rotate-180"> <i data-lucide="send" style="width:16px;height:16px"></i> </button>
+       </form>
+      </div>
+     </div>
+    </div>
+    <!-- TAB: Inventory & Suppliers -->
+<!-- TAB: Inventory & Suppliers -->
+<!-- TAB: Inventory & Suppliers -->
+<!-- TAB: Inventory & Suppliers -->
+<div id="tab-inventory" class="hidden pt-0 mt-0">
+  <div class="flex flex-col"> <!-- Added a wrapper to ensure top alignment -->
+    <h2 id="inventory-title" class="text-2xl font-bold text-gradient mb-1" style="font-family:'Playfair Display',serif">Inventory & Suppliers</h2>
+    <p id="inventory-desc" class="text-sm mb-6" style="color:#8b5cf6">Manage your products, services, and supplier credits.</p>
+    
+    <div class="grid grid-cols-1 gap-6">
+      <!-- Products Table -->
+      <div class="kpi-card rounded-xl p-6 fade-up">
+        <div class="flex justify-between items-center mb-6">
+          <h3 id="table-products-title-text" class="font-semibold text-lg" style="color:var(--steel-navy)">Products & Services</h3>
+          <button onclick="openProductModal()" class="gradient-btn text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+            <i data-lucide="plus" style="width:16px;height:16px"></i> <span id="btn-add-product">Add Product</span>
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left rtl:text-right text-xs" style="color:#8b5cf6;border-bottom:1px solid #e9d5ff">
+                <th id="th-name" class="pb-3 font-semibold">Name</th>
+                <th id="th-cost" class="pb-3 font-semibold">Cost to Make</th>
+                <th id="th-price" class="pb-3 font-semibold">Selling Price</th>
+                <th id="th-margin" class="pb-3 font-semibold">Profit Margin</th>
+              </tr>
+            </thead>
+            <tbody id="product-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Suppliers Table -->
+      <div class="kpi-card rounded-xl p-6 fade-up fade-up-d1">
+        <div class="flex justify-between items-center mb-6">
+          <h3 id="table-suppliers-title-text" class="font-semibold text-lg" style="color:var(--steel-navy)">Suppliers & Credits</h3>
+          <button onclick="alert('Coming soon!')" class="gradient-btn text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+            <i data-lucide="plus" style="width:16px;height:16px"></i> <span id="btn-add-supplier">Add Supplier</span>
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left rtl:text-right text-xs" style="color:#8b5cf6;border-bottom:1px solid #e9d5ff">
+                <th id="th-supplier" class="pb-3 font-semibold">Supplier Name</th>
+                <th id="th-service" class="pb-3 font-semibold">Service/Material</th>
+                <th id="th-owed" class="pb-3 font-semibold">Amount Owed</th>
+                <th id="th-due" class="pb-3 font-semibold">Due Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-t" style="border-color:#e9d5ff">
+                <td class="py-4 font-medium">AWS Cloud</td>
+                <td class="py-4 opacity-70">Server Hosting</td>
+                <td class="py-4 font-bold stat-down">-$320.00</td>
+                <td class="py-4" style="color:var(--amber)">Dec 17, 2024</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  <script>
+// --- Language System & Translations ---
+let currentLanguage = 'en';
+
+const translations = {
+  ar: {
+    tagline: 'إدارة مالية ذكية', dashboard: 'لوحة المراقبة', planning: 'التخطيط الاستراتيجي', aiChat: 'اسأل حربوق', reports: 'التقارير', settings: 'الإعدادات', planLabel: 'الخطة', planTier: 'مؤسسات', planUsage: '72% من الحد المسموح', greeting: 'أهلاً بعودتك، المدير', subtitle: 'إليك نظرة عامة على أدائك المالي اليوم', revenue: 'الإيرادات', expenses: 'النفقات', profit: 'الربح', cashRunway: 'مسار النقد', riskScore: 'درجة المخاطر', fromLastMonth: 'عن الشهر الماضي', profitMarginText: 'هامش الربح', healthy: 'موضع صحي', low: 'منخفضة', mo: 'شهر', months: 'أشهر', infinityMonths: '∞ أشهر', revenueExpenses: 'الإيرادات والنفقات', expenseDistribution: 'توزيع النفقات', salaries: 'الرواتب', operations: 'العمليات', marketing: 'التسويق', other: 'أخرى', recentTransactions: 'المعاملات الأخيرة', description: 'الوصف', category: 'الفئة', date: 'التاريخ', amount: 'المبلغ', income: 'دخل', expense: 'نفقة', txn1: 'فاتورة عميل #1042', txn2: 'استضافة AWS', txn3: 'رواتب الموظفين', date1: '18 ديسمبر', date2: '17 ديسمبر', date3: '15 ديسمبر', strategicPlanning: 'التخطيط الاستراتيجي', simulateScenarios: 'حاكي سيناريوهات الأعمال وشاهد النتائج المتوقعة.', scenarioVars: 'متغيرات السيناريو', newHires: 'الموظفون الجدد', priceIncrease: 'زيادة السعر', salesVolumeGrowth: 'نمو حجم المبيعات', projectedOutcomes: 'النتائج المتوقعة (12 شهر)', projRevenue: 'الإيرادات المتوقعة', projExpenses: 'النفقات المتوقعة', projProfit: 'صافي الربح', projRunway: 'مسار النقد المحدث', onlineNow: '● متصل الآن', aiGreeting: 'مرحباً 👋 أنا Harbouq، مساعدك الذكي. اسأل عن التدفق النقدي والميزانية أو إستراتيجية النمو!', askPlaceholder: 'اسأل Harbouq سؤالاً...', monthsArray: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+    // NEW INVENTORY KEYS
+    navInventory: 'المخزون والموردون',
+    inventoryTitle: 'المخزون والموردون',
+    inventoryDesc: 'إدارة منتجاتك، خدماتك، ومستحقات الموردين.',
+    tableProductsTitle: 'المنتجات والخدمات',
+    tableSuppliersTitle: 'الموردون والائتمانات',
+    btnAddProduct: 'إضافة منتج',
+    btnAddSupplier: 'إضافة مورد',
+    thName: 'الاسم',
+    thCost: 'تكلفة التصنيع',
+    thPrice: 'سعر البيع',
+    thMargin: 'هامش الربح',
+    thSupplier: 'اسم المورد',
+    thService: 'الخدمة/المادة',
+    thOwed: 'المبلغ المستحق',
+    thDueDate: 'تاريخ الاستحقاق'
+  },
+  en: {
+    tagline: 'Smart Financial Management', dashboard: 'Dashboard', planning: 'Strategic Planning', aiChat: 'Ask Harbouq', reports: 'Reports', settings: 'Settings', planLabel: 'Plan', planTier: 'Enterprise', planUsage: '72% of allowance used', greeting: 'Welcome back, Manager', subtitle: 'Here\'s an overview of your financial performance today', revenue: 'Revenue', expenses: 'Expenses', profit: 'Profit', cashRunway: 'Cash Runway', riskScore: 'Risk Score', fromLastMonth: 'from last month', profitMarginText: 'profit margin', healthy: 'Healthy position', low: 'Low', mo: 'mo', months: 'months', infinityMonths: '∞ months', revenueExpenses: 'Revenue & Expenses', expenseDistribution: 'Expense Distribution', salaries: 'Salaries', operations: 'Operations', marketing: 'Marketing', other: 'Other', recentTransactions: 'Recent Transactions', description: 'Description', category: 'Category', date: 'Date', amount: 'Amount', income: 'Income', expense: 'Expense', txn1: 'Client Invoice #1042', txn2: 'AWS Hosting', txn3: 'Monthly Payroll', date1: 'Dec 18', date2: 'Dec 17', date3: 'Dec 15', strategicPlanning: 'Strategic Planning', simulateScenarios: 'Simulate business scenarios and see expected outcomes.', scenarioVars: 'Scenario Variables', newHires: 'New Hires', priceIncrease: 'Price Increase', salesVolumeGrowth: 'Sales Volume Growth', projectedOutcomes: 'Projected Outcomes (12 months)', projRevenue: 'Projected Revenue', projExpenses: 'Projected Expenses', projProfit: 'Net Profit', projRunway: 'Updated Cash Runway', onlineNow: '● Online Now', aiGreeting: 'Hi 👋 I\'m Harbouq, your smart assistant. Ask about cash flow, budgeting or growth strategy!', askPlaceholder: 'Ask Harbouq a question...', monthsArray: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    // NEW INVENTORY KEYS
+    navInventory: 'Inventory & Suppliers',
+    inventoryTitle: 'Inventory & Suppliers',
+    inventoryDesc: 'Manage your products, services, and supplier credits.',
+    tableProductsTitle: 'Products & Services',
+    tableSuppliersTitle: 'Suppliers & Credits',
+    btnAddProduct: 'Add Product',
+    btnAddSupplier: 'Add Supplier',
+    thName: 'Name',
+    thCost: 'Cost to Make',
+    thPrice: 'Selling Price',
+    thMargin: 'Profit Margin',
+    thSupplier: 'Supplier Name',
+    thService: 'Service/Material',
+    thOwed: 'Amount Owed',
+    thDueDate: 'Due Date'
+  }
+};
+
+
+const defaultMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+function t(key) {
+  return translations[currentLanguage]?.[key] || translations['en'][key];
+}
+
+function toggleLanguage() {
+  currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+  const htmlEl = document.documentElement;
+  const appRoot = document.getElementById('app-root');
+  
+  if (currentLanguage === 'ar') {
+    htmlEl.setAttribute('lang', 'ar');
+    htmlEl.setAttribute('dir', 'rtl');
+    appRoot.style.direction = 'rtl';
+  } else {
+    htmlEl.setAttribute('lang', 'en');
+    htmlEl.setAttribute('dir', 'ltr');
+    appRoot.style.direction = 'ltr';
+  }
+
+  updateAllText();
+  updateScenario(); 
+  document.getElementById('lang-toggle').textContent = currentLanguage === 'ar' ? 'English' : 'العربية';
+}
+
+function updateAllText() {
+  const setEl = (id, key) => { const el = document.getElementById(id); if(el) el.textContent = t(key); };
+
+  // Sidebar & Plan
+  setEl('tagline', 'tagline');
+  setEl('nav-dashboard', 'dashboard');
+  setEl('nav-planning', 'planning');
+  setEl('nav-ai-name', 'aiChat');
+  setEl('nav-reports', 'reports');
+  setEl('nav-settings', 'settings');
+  setEl('plan-label', 'planLabel');
+  setEl('plan-tier', 'planTier');
+  setEl('plan-usage', 'planUsage');
+
+  // Header
+  setEl('greeting-el', 'greeting');
+  setEl('subtitle-el', 'subtitle');
+
+  // Dashboard KPIs
+  setEl('kpi-revenue', 'revenue');
+  setEl('kpi-expenses', 'expenses');
+  setEl('kpi-profit', 'profit');
+  setEl('kpi-runway', 'cashRunway');
+  setEl('kpi-risk', 'riskScore');
+  setEl('stat-rev', 'fromLastMonth');
+  setEl('stat-exp', 'fromLastMonth');
+  setEl('stat-prof', 'profitMarginText');
+  setEl('mo-text', 'mo');
+  setEl('runway-val', 'healthy');
+  setEl('risk-val', 'low');
+
+  // Dashboard Charts & Tables
+  setEl('chart-title', 'revenueExpenses');
+  setEl('legend-revenue', 'revenue');
+  setEl('legend-expenses', 'expenses');
+  setEl('donut-title', 'expenseDistribution');
+  setEl('expense-salaries', 'salaries');
+  setEl('expense-operations', 'operations');
+  setEl('expense-marketing', 'marketing');
+  setEl('expense-other', 'other');
+  setEl('txn-title', 'recentTransactions');
+  setEl('th-description', 'description');
+  setEl('th-category', 'category');
+  setEl('th-date', 'date');
+  setEl('th-amount', 'amount');
+  setEl('cat-income', 'income');
+  setEl('cat-expense', 'expense');
+  setEl('cat-expense2', 'expense');
+
+  // Strategic Planning
+  setEl('planning-title', 'strategicPlanning');
+  setEl('planning-desc', 'simulateScenarios');
+  setEl('scenario-title', 'scenarioVars');
+  setEl('label-hire', 'newHires');
+  setEl('label-price', 'priceIncrease');
+  setEl('label-volume', 'salesVolumeGrowth');
+  setEl('outcomes-title', 'projectedOutcomes');
+  setEl('label-proj-rev', 'projRevenue');
+  setEl('label-proj-exp', 'projExpenses');
+  setEl('label-proj-profit', 'projProfit');
+  setEl('label-proj-runway', 'projRunway');
+
+  // AI Chat
+  setEl('ai-chat-title', 'aiChat');
+  setEl('ai-status', 'onlineNow');
+  setEl('ai-greeting', 'aiGreeting');
+  const chatInput = document.getElementById('chat-input');
+  if(chatInput) chatInput.placeholder = t('askPlaceholder');
+
+  // --- NEW INVENTORY SECTION TRANSLATIONS ---
+  setEl('nav-inventory', 'navInventory');
+  setEl('inventory-title', 'inventoryTitle');
+  setEl('inventory-desc', 'inventoryDesc');
+  setEl('table-products-title-text', 'tableProductsTitle');
+  setEl('table-suppliers-title-text', 'tableSuppliersTitle');
+  setEl('btn-add-product', 'btnAddProduct');
+  setEl('btn-add-supplier', 'btnAddSupplier');
+  setEl('th-name', 'thName');
+  setEl('th-cost', 'thCost');
+  setEl('th-price', 'thPrice');
+  setEl('th-margin', 'thMargin');
+  setEl('th-supplier', 'thSupplier');
+  setEl('th-service', 'thService');
+  setEl('th-owed', 'thOwed');
+  setEl('th-due', 'thDueDate');
+
+  if (mainChart) {
+    mainChart.data.labels = t('monthsArray') || defaultMonths;
+    mainChart.data.datasets[0].label = t('revenue') || 'Revenue';
+    mainChart.data.datasets[1].label = t('expenses') || 'Expenses';
+    mainChart.update();
+  }
+  lucide.createIcons();
+}
+
+// --- Config & Element SDK ---
+const defaultConfig = {
+  company_name: 'Harbouq',
+  greeting_text: 'Welcome back, Manager',
+  ai_assistant_name: 'Ask Harbouq',
+  background_color: '#FBFBFE',
+  surface_color: '#FFFFFF',
+  text_color: '#2A1F3D',
+  primary_action_color: '#5E3B8E',
+  secondary_action_color: '#1E2A4A',
+  font_family: 'DM Sans',
+  font_size: 14
+};
+
+function applyConfig(config) {
+  const c = key => config[key] || defaultConfig[key];
+  const brandEl = document.getElementById('sidebar-brand');
+  const greetEl = document.getElementById('greeting-el');
+  const aiNameEl = document.getElementById('nav-ai-name');
+  const aiChatEl = document.getElementById('ai-chat-title');
+  
+  if(brandEl) brandEl.textContent = c('company_name');
+  if(greetEl) greetEl.textContent = c('greeting_text');
+  if(aiNameEl) aiNameEl.textContent = c('ai_assistant_name');
+  if(aiChatEl) aiChatEl.textContent = c('ai_assistant_name');
+
+  document.body.style.background = c('background_color');
+  document.body.style.color = c('text_color');
+  document.body.style.fontFamily = c('font_family') + ", 'DM Sans', sans-serif";
+  document.body.style.fontSize = c('font_size') + 'px';
+
+  document.querySelectorAll('.kpi-card').forEach(el => el.style.backgroundColor = c('surface_color'));
+  document.querySelectorAll('[style*="steel-navy"], h1, h2, h3').forEach(el => {
+    if (el.style.color && el.style.color.includes('30, 42, 74')) el.style.color = c('secondary_action_color');
+  });
+}
+
+// --- Tab Switching ---
+// --- Tab Switching ---
+function switchTab(tab) {
+  // 1. Remove active styling from all sidebar buttons
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.remove('active');
+  });
+  
+  // 2. Add active styling to the clicked button (based on order)
+  const tabs = ['dashboard', 'planning', 'ai', 'inventory'];
+  const index = tabs.indexOf(tab);
+  if(index > -1 && document.querySelectorAll('.nav-item')[index]) {
+    document.querySelectorAll('.nav-item')[index].classList.add('active');
+  }
+
+  // 3. Hide all tab content
+  document.getElementById('tab-dashboard').classList.add('hidden');
+  document.getElementById('tab-planning').classList.add('hidden');
+  document.getElementById('tab-ai').classList.add('hidden');
+  
+  // Also hide our new inventory tab
+  const inventoryTab = document.getElementById('tab-inventory');
+  if (inventoryTab) inventoryTab.classList.add('hidden');
+
+  // 4. Show the selected tab content
+  const selectedTab = document.getElementById('tab-' + tab);
+  if (selectedTab) selectedTab.classList.remove('hidden');
+  
+  // Re-render icons just in case
+  lucide.createIcons();
+}
+
+// --- Charts with Chart.js ---
+let mainChart, donutChart;
+
+function initCharts() {
+  const mainCtx = document.getElementById('mainChart')?.getContext('2d');
+  if (mainCtx) {
+    const revenue = [18, 21, 19.5, 24, 23, 26, 25, 27.5, 26.5, 29, 28, 31];
+    const expenses = [14, 14.5, 15, 15.5, 16, 15.8, 16.5, 17, 17.5, 18, 17.8, 18.7];
+
+    mainChart = new Chart(mainCtx, {
+      type: 'line',
+      data: {
+        labels: t('monthsArray') || defaultMonths,
+        datasets: [
+          {
+            label: t('revenue') || 'Revenue',
+            data: revenue,
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99, 102, 241, 0.08)',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#6366f1',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
+          },
+          {
+            label: t('expenses') || 'Expenses',
+            data: expenses,
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.08)',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#f59e0b',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            labels: { font: { size: 12, weight: '600' }, color: '#1f172d', usePointStyle: true, padding: 20 }
+          },
+          filler: { propagate: true }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 35,
+            grid: { color: 'rgba(225, 213, 255, 0.5)', drawBorder: false },
+            ticks: { color: '#8b5cf6', font: { size: 11 } }
+          },
+          x: {
+            grid: { display: false, drawBorder: false },
+            ticks: { color: '#8b5cf6', font: { size: 11 } }
+          }
+        }
+      }
+    });
+  }
+
+  const donutCtx = document.getElementById('donutChart')?.getContext('2d');
+  if (donutCtx) {
+    donutChart = new Chart(donutCtx, {
+      type: 'doughnut',
+      data: {
+        labels: [t('salaries') || 'Salaries', t('operations') || 'Operations', t('marketing') || 'Marketing', t('other') || 'Other'],
+        datasets: [
+          {
+            data: [42, 28, 18, 12],
+            backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#e9d5ff'],
+            borderColor: '#ffffff',
+            borderWidth: 3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+}
+
+// --- Scenario Simulator ---
+function updateScenario() {
+  const elHire = document.getElementById('slider-hire');
+  const elPrice = document.getElementById('slider-price');
+  const elVolume = document.getElementById('slider-volume');
+  
+  if(!elHire || !elPrice || !elVolume) return;
+
+  const hires = +elHire.value;
+  const price = +elPrice.value;
+  const volume = +elVolume.value;
+
+  document.getElementById('val-hire').textContent = hires;
+  document.getElementById('val-price').textContent = price + '%';
+  document.getElementById('val-volume').textContent = volume + '%';
+
+  const baseRev = 0.341;
+  const baseExp = 0.224;
+  const rev = baseRev * (1 + price / 100) * (1 + volume / 100);
+  const exp = baseExp + hires * 0.0085;
+  const profit = rev - exp;
+
+  document.getElementById('proj-rev').textContent = '$' + (rev * 10).toFixed(2) + 'K';
+  document.getElementById('proj-exp').textContent = '$' + (exp * 10).toFixed(2) + 'K';
+  
+  const elProfit = document.getElementById('proj-profit');
+  elProfit.textContent = '$' + (profit * 10).toFixed(2) + 'K';
+  elProfit.style.color = profit >= 0 ? 'var(--emerald)' : 'var(--rose)';
+  
+  const elRunway = document.getElementById('proj-runway');
+  if (profit > 0) {
+    elRunway.textContent = t('infinityMonths') || '∞ months';
+    elRunway.style.color = 'var(--emerald)';
+  } else {
+    const mo = Math.max(0, 0.12 / ((exp - rev) / 12));
+    elRunway.textContent = mo.toFixed(1) + ' ' + (t('months') || 'months');
+    elRunway.style.color = 'var(--rose)';
+  }
+}
+
+// --- AI Chat ---
+// --- SMART AI KEYWORD ENGINE (For Demo) ---
+
+const smartResponses = {
+  inventory: {
+    en: "I've analyzed your inventory. You currently have 3 main products. Your 'Premium Web Design' has the highest margin at 90%. I recommend focusing your marketing spend there.",
+    ar: "لقد حللت مخزونك. لديك حالياً 3 منتجات رئيسية. 'تصميم المواقع المميز' يحقق أعلى هامش ربح بنسبة 90٪. أنصح بتركيز ميزانية التسويق هناك."
+  },
+  suppliers: {
+    en: "You have $390.00 in outstanding credits. Your largest bill is AWS ($320.00) due on Dec 17. Your cash runway is healthy enough to cover this.",
+    ar: "لديك 390.00 دولاراً كديون للموردين. أكبر فاتورة هي AWS بقيمة 320.00 دولاراً تستحق في 17 ديسمبر. وضعك النقدي جيد لتغطية ذلك."
+  },
+  profit: {
+    en: "Your net profit margin is currently 28.7%. This is 5% higher than the industry average for small design agencies. Great job!",
+    ar: "هامش صافي ربحك حالياً هو 28.7٪. هذا أعلى بنسبة 5٪ من متوسط الصناعة لوكالات التصميم الصغيرة. عمل رائع!"
+  },
+  fallback: {
+    en: "That's an interesting question about your business. While I'm still learning your full history, my data shows your cash flow is positive for the last 30 days.",
+    ar: "هذا سؤال مثير للاهتمام حول عملك. بينما لا أزال أتعلم تاريخك الكامل، تظهر بياناتي أن تدفقك النقدي كان إيجابياً خلال الثلاثين يوماً الماضية."
+  }
+};
+
+let aiIdx = 0;
+
+function createAIBubble(msg) {
+  const div = document.createElement('div');
+  div.className = 'flex gap-3';
+  div.innerHTML = `
+    <div class="w-10 h-10 rounded-lg gradient-btn flex items-center justify-center flex-shrink-0">
+      <i data-lucide="sparkles" style="width:16px;height:16px;color:white"></i>
+    </div>
+    <div class="chat-bubble-ai px-4 py-3 rounded-2xl ${currentLanguage === 'ar' ? 'rounded-tr-sm' : 'rounded-tl-sm'} max-w-xs text-sm leading-relaxed">${msg}</div>
+  `;
+  return div;
+}
+
+const chatForm = document.getElementById('chat-form');
+if (chatForm) {
+  chatForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const input = document.getElementById('chat-input');
+    const msg = input.value.trim().toLowerCase();
+    if (!msg) return;
+
+    // 1. Display User Message
+    const container = document.getElementById('chat-messages');
+    const userDiv = document.createElement('div');
+    userDiv.className = 'flex justify-start';
+    userDiv.innerHTML = `<div class="chat-bubble-user px-4 py-3 rounded-2xl ${currentLanguage === 'ar' ? 'rounded-tl-sm' : 'rounded-tr-sm'} max-w-xs text-sm">${input.value}</div>`;
+    container.appendChild(userDiv);
+    input.value = '';
+    container.scrollTop = container.scrollHeight;
+
+    // 2. Determine Smart Response
+    let responseKey = 'fallback';
+    if (msg.includes('product') || msg.includes('inventory') || msg.includes('منتج') || msg.includes('مخزون')) {
+      responseKey = 'inventory';
+    } else if (msg.includes('supplier') || msg.includes('owe') || msg.includes('credit') || msg.includes('مورد') || msg.includes('دين')) {
+      responseKey = 'suppliers';
+    } else if (msg.includes('profit') || msg.includes('revenue') || msg.includes('money') || msg.includes('ربح') || msg.includes('مال')) {
+      responseKey = 'profit';
+    }
+
+    // 3. Display AI "Thinking" and then Response
+    setTimeout(() => {
+      const responseText = smartResponses[responseKey][currentLanguage];
+      const aiBubble = createAIBubble(responseText);
+      container.appendChild(aiBubble);
+      container.scrollTop = container.scrollHeight;
+      lucide.createIcons();
+    }, 700);
+  });
+}
+
+// --- Initialization ---
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.elementSdk) {
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange: async (config) => applyConfig(config),
+      mapToCapabilities: (config) => {
+        const c = key => config[key] || defaultConfig[key];
+        const mut = (key) => ({
+          get: () => c(key),
+          set: (v) => { config[key] = v; window.elementSdk.setConfig({ [key]: v }); }
+        });
+        return {
+          recolorables: [mut('background_color'), mut('surface_color'), mut('text_color'), mut('primary_action_color'), mut('secondary_action_color')],
+          borderables: [],
+          fontEditable: mut('font_family'),
+          fontSizeable: mut('font_size')
+        };
+      },
+      mapToEditPanelValues: (config) => {
+        const c = key => config[key] || defaultConfig[key];
+        return new Map([
+          ['company_name', c('company_name')],
+          ['greeting_text', c('greeting_text')],
+          ['ai_assistant_name', c('ai_assistant_name')]
+        ]);
+      }
+    });
+  } else {
+    applyConfig(defaultConfig);
+  }
+
+  lucide.createIcons();
+  initCharts();
+  updateScenario();
+  renderProductTable();
+  updateAllText();
+});
+
+window.addEventListener('resize', () => { 
+  if (mainChart) mainChart.resize(); 
+  if (donutChart) donutChart.resize(); 
+});
+// --- Local Storage Database Logic ---
+
+// 1. Initial Data (Fallback if localStorage is empty)
+const defaultProducts = [
+  { name: "Premium Web Design", cost: 50, price: 500 },
+  { name: "SEO Audit", cost: 20, price: 150 }
+];
+
+// 2. Load Products from LocalStorage
+let products = JSON.parse(localStorage.getItem('harbouq_products')) || defaultProducts;
+
+function openProductModal() { document.getElementById('product-modal').classList.remove('hidden'); lucide.createIcons(); }
+function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
+
+// 3. Render the Table
+function renderProductTable() {
+  const tbody = document.getElementById('product-table-body'); // Selects the first table body in the inventory tab
+  if(!tbody) return;
+
+  tbody.innerHTML = ''; // Clear current rows
+
+  products.forEach(p => {
+    const margin = (((p.price - p.cost) / p.price) * 100).toFixed(0);
+    const row = `
+      <tr class="border-t" style="border-color:#e9d5ff">
+       <td class="py-4 font-medium">${p.name}</td>
+       <td class="py-4" style="color:var(--rose)">$${parseFloat(p.cost).toFixed(2)}</td>
+       <td class="py-4 font-semibold" style="color:var(--emerald)">$${parseFloat(p.price).toFixed(2)}</td>
+       <td class="py-4" style="color:var(--emerald)">${margin}%</td>
+      </tr>
+    `;
+    tbody.innerHTML += row;
+  });
+}
+
+// 4. Handle Form Submission
+document.getElementById('product-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const newProduct = {
+    name: document.getElementById('p-name').value,
+    cost: parseFloat(document.getElementById('p-cost').value),
+    price: parseFloat(document.getElementById('p-price').value)
+  };
+
+  products.push(newProduct);
+  localStorage.setItem('harbouq_products', JSON.stringify(products)); // Save to "Database"
+  
+  renderProductTable();
+  closeProductModal();
+  this.reset();
+});
+
+// 5. Initialize the table on load
+document.addEventListener('DOMContentLoaded', () => {
+  renderProductTable();
+});
+  </script>
+  <!-- Add Product Modal -->
+<div id="product-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl fade-up">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xl font-bold" style="color:var(--steel-navy)">Add New Product</h3>
+      <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-600">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <form id="product-form" class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold mb-1">Product Name</label>
+        <input type="text" id="p-name" required class="w-full px-4 py-2 rounded-lg border focus:ring-2 outline-none" style="border-color:var(--lilac-border)">
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold mb-1">Cost to Make ($)</label>
+          <input type="number" id="p-cost" required step="0.01" class="w-full px-4 py-2 rounded-lg border focus:ring-2 outline-none" style="border-color:var(--lilac-border)">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">Selling Price ($)</label>
+          <input type="number" id="p-price" required step="0.01" class="w-full px-4 py-2 rounded-lg border focus:ring-2 outline-none" style="border-color:var(--lilac-border)">
+        </div>
+      </div>
+      <button type="submit" class="w-full gradient-btn text-white font-bold py-3 rounded-xl mt-4">Save Product</button>
+    </form>
+  </div>
+</div>
+ </body>
+</html>

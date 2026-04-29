@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en" class="h-full" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Harbouq - Login</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --aubergine: #1a0f2e;
+        --steel-navy: #0f1729;
+        --royal-amethyst: #6366f1;
+        --emerald: #10b981;
+        --amber: #f59e0b;
+        --rose: #ef4444;
+        --porcelain: #f8f7ff;
+        --lilac-border: #e9d5ff;
+        --slate-purple: #1f172d;
+        --purple-shadow: rgba(26, 15, 46, 0.08);
+        --gold: #d4af37;
+      }
+      html, body { height: 100%; margin: 0; }
+      body { font-family: 'IBM Plex Sans Arabic', sans-serif; background: var(--porcelain); color: var(--slate-purple); }
+      .gradient-btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
+      .gradient-btn:hover { background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%); }
+      .premium-glow { box-shadow: 0 0 30px rgba(99, 102, 241, 0.15); }
+    </style>
+  </head>
+  <body class="bg-gray-100 flex items-center justify-center min-h-screen" style="background: var(--porcelain);">
+    <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+      <div class="flex items-center justify-center gap-3 mb-6">
+        <div class="w-12 h-12 rounded-xl gradient-btn flex items-center justify-center premium-glow">
+          <i data-lucide="gem" style="width:20px;height:20px;color:white"></i>
+        </div>
+        <span class="text-4xl font-extrabold text-center text-gray-800" style="font-family:'Playfair Display',serif">Harbouq</span>
+      </div>
+      <p class="text-center text-gray-600 mb-8">Your Managerial Accounting Dashboard</p>
+      <form id="login-form">
+        <div class="mb-4">
+          <label for="email" class="sr-only">Email</label>
+          <input type="email" id="email" name="email" placeholder="Email" class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:outline-none focus:border-indigo-500" required>
+        </div>
+        <div class="mb-6">
+          <label for="password" class="sr-only">Password</label>
+          <input type="password" id="password" name="password" placeholder="Password" class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:outline-none focus:border-indigo-500" required>
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-md mb-4">Sign In</button>
+      </form>
+      <div class="flex items-center justify-between my-6">
+        <span class="border-b flex-grow border-gray-200"></span>
+        <span class="px-4 text-gray-400 text-sm">OR</span>
+        <span class="border-b flex-grow border-gray-200"></span>
+      </div>
+      <button id="explore-demo-btn" class="w-full gradient-btn text-white font-bold py-3 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg">Explore Demo Business</button>
+    </div>
+    <script>
+      lucide.createIcons();
+      document.getElementById("login-form").addEventListener("submit", function(event) {
+        event.preventDefault();
+        window.location.href = "dashboard.html";
+      });
+      document.getElementById("explore-demo-btn").addEventListener("click", function() {
+        window.location.href = "dashboard.html";
+      });
+    </script>
+  </body>
+</html>
